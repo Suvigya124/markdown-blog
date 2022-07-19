@@ -1,6 +1,8 @@
 const express = require('express')
-const mongoose =require('mongoose')
+const mongoose = require('mongoose')
+const Article = require('./models/article')
 const articleRouter = require('./routes/articles')
+const methodOverride = require('method-override')
 const app = express()
 
 mongoose.connect('mongodb://localhost/blog',{               //line of codes to connect our database with the help of mongoose
@@ -10,18 +12,10 @@ mongoose.connect('mongodb://localhost/blog',{               //line of codes to c
 
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
+app.use(methodOverride('_method'))
 
-app.get('/', (req, res) => {
-    const articles = [{
-        title: 'Test Article1',
-        createdAt: (new Date()).toDateString() +' - '+ (new Date()).toLocaleTimeString().toUpperCase() + ' (India Standard Time)',
-        description: 'This is first article of our blog'
-    },
-    {
-        title: 'Test Article2',
-        createdAt: (new Date()).toDateString() +' - '+ (new Date()).toLocaleTimeString().toUpperCase() + ' (India Standard Time)',
-        description: 'This is second article of our blog'
-    }]
+app.get('/', async (req, res) => {
+    const articles = await Article.find().sort({createdAt: 'desc'})
     res.render('articles/index', {articles: articles})
 })
 
